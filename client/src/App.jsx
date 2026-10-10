@@ -14,26 +14,66 @@ const STORAGE_KEY = "pokedex-content-studio";
 function App() {
   const [activePage, setActivePage] = useState("dashboard");
 
-  const [pokemon, setPokemon] = useState(() => {
-    try {
-      const savedData = localStorage.getItem(STORAGE_KEY);
+  
+const [pokemon, setPokemon] = useState(() => {
+  try {
+    const savedData = localStorage.getItem(STORAGE_KEY);
 
-      if (savedData) {
-        const parsedData = JSON.parse(savedData);
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
 
-        if (Array.isArray(parsedData)) {
-          return parsedData;
-        }
+      if (Array.isArray(parsedData)) {
+        // Preserve saved content, but restore any missing
+        // Pokémon from the original 151-entry data.
+        const savedById = new Map(
+          parsedData.map((item) => [item.id, item])
+        );
+
+        return pokemonData.map((original) => {
+          const saved = savedById.get(original.id);
+
+          if (!saved) {
+            return {
+              ...original,
+              drawing: { ...original.drawing },
+              short: { ...original.short },
+              long: { ...original.long },
+            };
+          }
+
+          return {
+            ...original,
+            ...saved,
+            number: original.id,
+            drawing: {
+              ...original.drawing,
+              ...saved.drawing,
+            },
+            short: {
+              ...original.short,
+              ...saved.short,
+            },
+            long: {
+              ...original.long,
+              ...saved.long,
+            },
+          };
+        });
       }
-    } catch (error) {
-      console.error(
-        "Unable to load saved content:",
-        error
-      );
     }
+  } catch (error) {
+    console.error("Unable to load saved content:", error);
+  }
 
-    return pokemonData;
-  });
+  return pokemonData.map((item) => ({
+    ...item,
+    number: item.id,
+    drawing: { ...item.drawing },
+    short: { ...item.short },
+    long: { ...item.long },
+  }));
+});
+
 
   const [selectedPokemon, setSelectedPokemon] =
     useState(null);
@@ -886,8 +926,8 @@ function PokemonPage({
           </span>
 
           <h2>
-            All Pokémon
-          </h2>
+  All Pokémon ({filteredPokemon.length} / {pokemon.length})
+</h2>
 
           <p>
             Manage content production
