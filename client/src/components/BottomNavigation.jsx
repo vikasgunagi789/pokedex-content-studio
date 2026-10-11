@@ -3,6 +3,7 @@ import {
   BookOpen,
   CalendarDays,
   ChartNoAxesCombined,
+  Video,
 } from "lucide-react";
 
 const navigationItems = [
@@ -15,6 +16,11 @@ const navigationItems = [
     id: "pokedex",
     label: "Pokédex",
     icon: BookOpen,
+  },
+  {
+    id: "videos",
+    label: "Videos",
+    icon: Video,
   },
   {
     id: "schedule",
@@ -30,9 +36,11 @@ const navigationItems = [
 
 function BottomNavigation({ activePage, setActivePage }) {
   return (
-    <nav className="bottom-navigation" aria-label="Main navigation">
+    <nav
+      className="bottom-navigation"
+      aria-label="Main navigation"
+    >
       <div className="bottom-navigation-inner">
-
         <div className="bottom-nav-items">
           {navigationItems.map((item) => {
             const Icon = item.icon;
@@ -66,7 +74,6 @@ function BottomNavigation({ activePage, setActivePage }) {
             );
           })}
         </div>
-
       </div>
     </nav>
   );

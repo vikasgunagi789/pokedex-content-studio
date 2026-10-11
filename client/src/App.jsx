@@ -11,20 +11,312 @@ import VideoVault from "./components/VideoVault";
 import { getPokemonImage } from "./utils/pokemonImage";
 
 const STORAGE_KEY = "pokedex-content-studio";
-
 const VIDEO_STORAGE_KEY = "vg-pokestudio-videos";
 
-const [videos, setVideos] = useState(() => {
-  try {
-    const savedVideos = localStorage.getItem(VIDEO_STORAGE_KEY);
-    const parsedVideos = savedVideos ? JSON.parse(savedVideos) : [];
+// function App() {
+//   const [activePage, setActivePage] = useState("dashboard");
+//   const [selectedPokemon, setSelectedPokemon] = useState(null);
 
-    return Array.isArray(parsedVideos) ? parsedVideos : [];
-  } catch (error) {
-    console.error("Unable to load saved videos:", error);
-    return [];
-  }
-});
+//   const [videos, setVideos] = useState(() => {
+//     try {
+//       const savedVideos = localStorage.getItem(VIDEO_STORAGE_KEY);
+//       const parsedVideos = savedVideos
+//         ? JSON.parse(savedVideos)
+//         : [];
+
+//       return Array.isArray(parsedVideos) ? parsedVideos : [];
+//     } catch (error) {
+//       console.error("Unable to load saved videos:", error);
+//       return [];
+//     }
+//   });
+
+//   const [pokemon, setPokemon] = useState(() => {
+//     try {
+//       const savedData = localStorage.getItem(STORAGE_KEY);
+
+//       if (savedData) {
+//         const parsedData = JSON.parse(savedData);
+
+//         if (Array.isArray(parsedData)) {
+//           const savedById = new Map(
+//             parsedData.map((item) => [item.id, item])
+//           );
+
+//           return pokemonData.map((original) => {
+//             const saved = savedById.get(original.id);
+
+//             if (!saved) {
+//               return {
+//                 ...original,
+//                 drawing: { ...original.drawing },
+//                 short: { ...original.short },
+//                 long: { ...original.long },
+//               };
+//             }
+
+//             return {
+//               ...original,
+//               ...saved,
+//               number: original.id,
+//               drawing: {
+//                 ...original.drawing,
+//                 ...saved.drawing,
+//               },
+//               short: {
+//                 ...original.short,
+//                 ...saved.short,
+//               },
+//               long: {
+//                 ...original.long,
+//                 ...saved.long,
+//               },
+//             };
+//           });
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Unable to load saved content:", error);
+//     }
+
+//     return pokemonData.map((item) => ({
+//       ...item,
+//       number: item.id,
+//       drawing: { ...item.drawing },
+//       short: { ...item.short },
+//       long: { ...item.long },
+//     }));
+//   });
+
+//   useEffect(() => {
+//     try {
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(pokemon));
+//     } catch (error) {
+//       console.error("Unable to save content:", error);
+//     }
+//   }, [pokemon]);
+
+//   useEffect(() => {
+//     try {
+//       localStorage.setItem(
+//         VIDEO_STORAGE_KEY,
+//         JSON.stringify(videos)
+//       );
+//     } catch (error) {
+//       console.error("Unable to save videos:", error);
+//     }
+//   }, [videos]);
+
+//   const totalPokemon = pokemon.length;
+
+//   const completedDrawings = pokemon.filter(
+//     (item) =>
+//       item.drawing?.status === "completed" ||
+//       item.drawing?.status === "published"
+//   ).length;
+
+//   const completedShorts = pokemon.filter(
+//     (item) =>
+//       item.short?.status === "completed" ||
+//       item.short?.status === "published"
+//   ).length;
+
+//   const completedLongs = pokemon.filter(
+//     (item) =>
+//       item.long?.status === "completed" ||
+//       item.long?.status === "published"
+//   ).length;
+
+//   function updatePokemon(updatedPokemon) {
+//     setPokemon((currentPokemon) =>
+//       currentPokemon.map((item) =>
+//         item.id === updatedPokemon.id
+//           ? updatedPokemon
+//           : item
+//       )
+//     );
+
+//     setSelectedPokemon(updatedPokemon);
+//   }
+
+//   function handleAddVideo(newVideo) {
+//     setVideos((currentVideos) => [
+//       newVideo,
+//       ...currentVideos,
+//     ]);
+//   }
+
+//   function handleDeleteVideo(videoId) {
+//     setVideos((currentVideos) =>
+//       currentVideos.filter((video) => video.id !== videoId)
+//     );
+//   }
+
+//   function updateAllPokemon(updatedPokemonList) {
+//     if (!Array.isArray(updatedPokemonList)) return;
+
+//     setPokemon(updatedPokemonList);
+
+//     if (selectedPokemon) {
+//       const updatedSelectedPokemon = updatedPokemonList.find(
+//         (item) => item.id === selectedPokemon.id
+//       );
+
+//       if (updatedSelectedPokemon) {
+//         setSelectedPokemon(updatedSelectedPokemon);
+//       }
+//     }
+//   }
+
+//   function openPokemon(pokemonItem) {
+//     setSelectedPokemon(pokemonItem);
+//   }
+
+//   function closePokemon() {
+//     setSelectedPokemon(null);
+//   }
+
+//   function resetAllContent() {
+//     const confirmed = window.confirm(
+//       "Reset all Pokédex content? This will remove all generated and edited content."
+//     );
+
+//     if (!confirmed) return;
+
+//     const freshData = pokemonData.map((item) => ({
+//       ...item,
+//       drawing: { ...item.drawing },
+//       short: { ...item.short },
+//       long: { ...item.long },
+//     }));
+
+//     setPokemon(freshData);
+//     setSelectedPokemon(null);
+
+//     try {
+//       localStorage.removeItem(STORAGE_KEY);
+//     } catch (error) {
+//       console.error("Unable to reset saved content:", error);
+//     }
+//   }
+
+//   function exportContent() {
+//     try {
+//       const json = JSON.stringify(pokemon, null, 2);
+//       const blob = new Blob([json], {
+//         type: "application/json",
+//       });
+
+//       const url = URL.createObjectURL(blob);
+//       const link = document.createElement("a");
+
+//       link.href = url;
+//       link.download = "pokedex-content-studio.json";
+
+//       document.body.appendChild(link);
+//       link.click();
+//       document.body.removeChild(link);
+
+//       URL.revokeObjectURL(url);
+//     } catch (error) {
+//       console.error("Unable to export content:", error);
+//       window.alert("Unable to export content.");
+//     }
+//   }
+
+//   if (selectedPokemon) {
+//     return (
+//       <div className="app">
+//         <main className="main-content">
+//           <Topbar
+//             title={selectedPokemon.name}
+//             onReset={resetAllContent}
+//             onExport={exportContent}
+//           />
+
+//           <section className="content-area">
+//             <PokemonDetail
+//               pokemon={selectedPokemon}
+//               onBack={closePokemon}
+//               onUpdate={updatePokemon}
+//             />
+//           </section>
+//         </main>
+
+//         <BottomNavigation
+//           activePage={activePage}
+//           setActivePage={(page) => {
+//             setSelectedPokemon(null);
+//             setActivePage(page);
+//           }}
+//         />
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="app">
+//       <main className="main-content">
+//         <Topbar
+//           title={getPageTitle(activePage)}
+//           onReset={resetAllContent}
+//           onExport={exportContent}
+//         />
+
+//         <section className="content-area">
+//           {activePage === "dashboard" && (
+//             <Dashboard
+//               totalPokemon={totalPokemon}
+//               completedDrawings={completedDrawings}
+//               completedShorts={completedShorts}
+//               completedLongs={completedLongs}
+//             />
+//           )}
+
+//           {activePage === "pokedex" && (
+//             <PokemonPage
+//               pokemon={pokemon}
+//               onOpenPokemon={openPokemon}
+//             />
+//           )}
+
+//           {activePage === "schedule" && (
+//             <SchedulePage
+//               pokemon={pokemon}
+//               onUpdatePokemon={updatePokemon}
+//             />
+//           )}
+
+//           {activePage === "progress" && (
+//             <ProgressPage
+//               totalPokemon={totalPokemon}
+//               completedDrawings={completedDrawings}
+//               completedShorts={completedShorts}
+//               completedLongs={completedLongs}
+//             />
+//           )}
+
+//           {activePage === "videos" && (
+//             <VideoVault
+//               pokemon={pokemon}
+//               videos={videos}
+//               onAddVideo={handleAddVideo}
+//               onDeleteVideo={handleDeleteVideo}
+//             />
+//           )}
+//         </section>
+//       </main>
+
+//       <BottomNavigation
+//         activePage={activePage}
+//         setActivePage={(page) => {
+//           setSelectedPokemon(null);
+//           setActivePage(page);
+//         }}
+//       />
+//     </div>
+//   );
+// }
 
 function App() {
   const [activePage, setActivePage] = useState("dashboard");
