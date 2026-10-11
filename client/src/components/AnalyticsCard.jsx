@@ -1,55 +1,76 @@
-function AnalyticsCard({
-  title,
-  value,
-  total,
-  description
+
+import {
+  LayoutDashboard,
+  Grid2X2,
+  CalendarDays,
+  ChartNoAxesCombined,
+  Video
+} from "lucide-react";
+
+const navigationItems = [
+  {
+    id: "dashboard",
+    label: "Home",
+    icon: LayoutDashboard
+  },
+  {
+    id: "pokedex",
+    label: "Pokédex",
+    icon: Grid2X2
+  },
+  {
+    id: "schedule",
+    label: "Schedule",
+    icon: CalendarDays
+  },
+  {
+    id: "progress",
+    label: "Progress",
+    icon: ChartNoAxesCombined
+  },
+  {
+    id: "videos",
+    label: "Videos",
+    icon: Video
+  }
+];
+
+function BottomNavigation({
+  activePage,
+  setActivePage
 }) {
-  const percentage =
-    total > 0
-      ? Math.round(
-          (value / total) * 100
-        )
-      : 0;
-
   return (
-    <div className="analytics-card">
+    <nav
+      className="bottom-navigation"
+      aria-label="Main navigation"
+    >
+      {navigationItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = activePage === item.id;
 
-      <div className="analytics-card-header">
+        return (
+          <button
+            key={item.id}
+            type="button"
+            className={`bottom-nav-item ${
+              isActive ? "active" : ""
+            }`}
+            onClick={() => setActivePage(item.id)}
+            aria-current={isActive ? "page" : undefined}
+            aria-label={item.label}
+          >
+            <span className="bottom-nav-icon">
+              <Icon size={21} strokeWidth={isActive ? 2.4 : 1.8} />
+            </span>
 
-        <div>
-          <span>
-            {title}
-          </span>
-
-          <strong>
-            {value} / {total}
-          </strong>
-        </div>
-
-        <strong>
-          {percentage}%
-        </strong>
-
-      </div>
-
-      <div className="analytics-progress">
-
-        <div
-          style={{
-            width: `${percentage}%`
-          }}
-        />
-
-      </div>
-
-      {description && (
-        <small>
-          {description}
-        </small>
-      )}
-
-    </div>
+            <span className="bottom-nav-label">
+              {item.label}
+            </span>
+          </button>
+        );
+      })}
+    </nav>
   );
 }
 
-export default AnalyticsCard;
+export default BottomNavigation;

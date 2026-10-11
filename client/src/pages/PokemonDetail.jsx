@@ -1,103 +1,136 @@
+
 import { useMemo, useState } from "react";
 
 import {
   ArrowLeft,
   Copy,
   Check,
-  RefreshCw
+  RefreshCw,
+  Play
 } from "lucide-react";
 
 import { generateContent } from "../utils/contentGenerator";
-
 import { getPokemonImage } from "../utils/pokemonImage";
 
 function PokemonDetail({
   pokemon,
+  videos = [],
   onBack,
   onUpdate
 }) {
   const [copiedField, setCopiedField] = useState("");
 
   /*
-   * Generate content directly from
-   * the Pokémon name.
+   * GENERATE CONTENT
    */
   const generatedContent = useMemo(() => {
-    return generateContent(
-      pokemon?.name || "Pokémon"
+    return generateContent(pokemon?.name || "Pokémon");
+  }, [pokemon?.name]);
+
+  const drawingTitle = generatedContent.drawing.title;
+  const drawingCaption = generatedContent.drawing.caption;
+  const drawingHashtags = generatedContent.drawing.hashtags;
+
+  const shortTitle = generatedContent.short.title;
+  const shortCaption = generatedContent.short.caption;
+  const shortHashtags = generatedContent.short.hashtags;
+  const shortScript = generatedContent.short.script;
+
+  const longTitle = generatedContent.long.title;
+  const longDescription = generatedContent.long.description;
+  const longCaption = generatedContent.long.caption;
+  const longHashtags = generatedContent.long.hashtags;
+  const longScript = generatedContent.long.script;
+
+  /*
+   * INSTAGRAM CAPTION
+   */
+  const instagramCaption = useMemo(() => {
+    const pokemonName = pokemon?.name || "Pokémon";
+
+    const pokemonHashtag = pokemonName.replace(
+      /[^a-zA-Z0-9]/g,
+      ""
     );
+
+    return [
+      `Drawing ${pokemonName} for my Pokédex journey!`,
+      "",
+      `Follow my journey as I draw Pokémon, one at a time.`,
+      "",
+      `#Pokemon #${pokemonHashtag} #PokemonDrawing #PokemonArt #Pokedex #AnimeArt #Drawing`
+    ].join("\n");
   }, [pokemon?.name]);
 
   /*
-   * DRAWING CONTENT
+   * FIND VIDEOS FOR THIS POKÉMON
+   *
+   * Supports common video object fields:
+   * pokemonId, pokemonName, pokemon.id, pokemon.name,
+   * url, videoUrl, cloudinaryUrl and secure_url.
    */
-  const drawingTitle =
-    generatedContent.drawing.title;
+  const pokemonVideos = useMemo(() => {
+    if (!Array.isArray(videos)) {
+      return [];
+    }
 
-  const drawingCaption =
-    generatedContent.drawing.caption;
+    return videos.filter((video) => {
+      const videoPokemonId =
+        video.pokemonId ??
+        video.pokemon?.id ??
+        video.pokemon?.pokemonId;
 
-  const drawingHashtags =
-    generatedContent.drawing.hashtags;
+      const videoPokemonName = String(
+        video.pokemonName ??
+        video.pokemon?.name ??
+        ""
+      ).toLowerCase().trim();
+
+      const currentPokemonName = String(
+        pokemon?.name || ""
+      ).toLowerCase().trim();
+
+      const matchesId =
+        videoPokemonId !== undefined &&
+        videoPokemonId !== null &&
+        String(videoPokemonId) === String(pokemon?.id);
+
+      const matchesName =
+        videoPokemonName !== "" &&
+        videoPokemonName === currentPokemonName;
+
+      return matchesId || matchesName;
+    });
+  }, [videos, pokemon?.id, pokemon?.name]);
 
   /*
-   * SHORT VIDEO CONTENT
+   * COPY CONTENT
    */
-  const shortTitle =
-    generatedContent.short.title;
-
-  const shortCaption =
-    generatedContent.short.caption;
-
-  const shortHashtags =
-    generatedContent.short.hashtags;
-
-  const shortScript =
-    generatedContent.short.script;
-
-  /*
-   * LONG VIDEO CONTENT
-   */
-  const longTitle =
-    generatedContent.long.title;
-
-  const longDescription =
-    generatedContent.long.description;
-
-  const longCaption =
-    generatedContent.long.caption;
-
-  const longHashtags =
-    generatedContent.long.hashtags;
-
-  const longScript =
-    generatedContent.long.script;
-
-  /* =====================================================
-     COPY
-  ===================================================== */
-
   async function copyText(text, field) {
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(String(text ?? ""));
 
       setCopiedField(field);
 
-      setTimeout(() => {
+      window.setTimeout(() => {
         setCopiedField("");
       }, 1500);
     } catch (error) {
       console.error("Copy failed:", error);
+      window.alert(
+        "Unable to copy. Please check your browser permissions."
+      );
     }
   }
 
-  /* =====================================================
-     SAVE CONTENT
-  ===================================================== */
-
+  /*
+   * SAVE GENERATED CONTENT
+   */
   function saveGeneratedContent() {
     const updatedPokemon = {
       ...pokemon,
+
+      instagramCaption,
 
       drawing: {
         ...(pokemon.drawing || {}),
@@ -112,7 +145,8 @@ function PokemonDetail({
         caption: shortCaption,
         socialCaption: shortCaption,
         hashtags: shortHashtags,
-        script: shortScript
+        script: shortScript,
+        instagramCaption
       },
 
       long: {
@@ -128,27 +162,28 @@ function PokemonDetail({
     onUpdate(updatedPokemon);
   }
 
-  /* =====================================================
-     REGENERATE
-  ===================================================== */
-
+  /*
+   * REGENERATE CONTENT
+   */
   function regenerateContent() {
     const regenerated = generateContent(
       pokemon?.name || "Pokémon"
     );
 
-    console.log(
-      "Generated content:",
-      regenerated
+    console.log("Generated content:", regenerated);
+
+    window.alert(
+      "New content was generated in the console. Your current displayed content has not been changed."
     );
   }
 
-  /* =====================================================
-     COPY ALL CONTENT
-  ===================================================== */
-
+  /*
+   * COPY ALL CONTENT
+   */
   async function copyAllContent() {
     const allContent = `
+POKÉMON: ${pokemon.name}
+
 DRAWING CONTENT
 
 TITLE
@@ -192,22 +227,20 @@ ${longHashtags}
 
 SCRIPT
 ${longScript}
+
+
+INSTAGRAM CAPTION
+
+${instagramCaption}
 `.trim();
 
-    await copyText(
-      allContent,
-      "all"
-    );
+    await copyText(allContent, "all");
   }
 
-  /* =====================================================
-     STATUS UPDATE
-  ===================================================== */
-
-  function updateStatus(
-    contentType,
-    status
-  ) {
+  /*
+   * UPDATE PRODUCTION STATUS
+   */
+  function updateStatus(contentType, status) {
     const updatedPokemon = {
       ...pokemon,
 
@@ -223,9 +256,7 @@ ${longScript}
   return (
     <div className="pokemon-detail-page">
 
-      {/* =================================================
-          BACK
-      ================================================= */}
+      {/* BACK BUTTON */}
 
       <button
         type="button"
@@ -233,207 +264,260 @@ ${longScript}
         onClick={onBack}
       >
         <ArrowLeft size={17} />
-
-        <span>
-          Back to Pokédex
-        </span>
+        <span>Back to Pokédex</span>
       </button>
 
-      {/* =================================================
-          HERO
-      ================================================= */}
+      {/* POKÉMON HERO */}
 
       <section className="pokemon-detail-hero">
-
         <div className="detail-image-wrapper">
           <img
-            src={getPokemonImage(
-              pokemon.id
-            )}
+            src={getPokemonImage(pokemon.id)}
             alt={pokemon.name}
             className="detail-pokemon-image"
           />
         </div>
 
         <div className="detail-hero-info">
-
           <span className="detail-number">
-            #
-            {String(
-              pokemon.number
-            ).padStart(3, "0")}
+            #{String(pokemon.number ?? pokemon.id).padStart(3, "0")}
           </span>
 
-          <h1>
-            {pokemon.name}
-          </h1>
+          <h1>{pokemon.name}</h1>
 
           <p className="detail-subtitle">
             Pokémon Content Workspace
           </p>
 
           <div className="detail-meta">
-
             {pokemon.type && (
               <span>
-                {Array.isArray(
-                  pokemon.type
-                )
-                  ? pokemon.type.join(
-                      " / "
-                    )
+                {Array.isArray(pokemon.type)
+                  ? pokemon.type.join(" / ")
                   : pokemon.type}
               </span>
             )}
 
-            <span>
-              Generation 1
-            </span>
-
-            <span>
-              Kanto
-            </span>
-
+            <span>Generation 1</span>
+            <span>Kanto</span>
           </div>
         </div>
       </section>
 
-      {/* =================================================
-          PRODUCTION STATUS
-      ================================================= */}
+      {/* PRODUCTION STATUS */}
 
       <section className="detail-section">
-
         <div className="detail-section-heading">
-
           <div>
             <span className="section-label">
               PRODUCTION STATUS
             </span>
 
-            <h2>
-              Content Pipeline
-            </h2>
+            <h2>Content Pipeline</h2>
           </div>
-
         </div>
 
         <div className="detail-status-grid">
-
           <StatusCard
             title="Drawing"
-            status={
-              pokemon.drawing?.status ||
-              "pending"
-            }
-            onChange={(status) =>
-              updateStatus(
-                "drawing",
-                status
-              )
-            }
+            status={pokemon.drawing?.status || "pending"}
+            onChange={(status) => updateStatus("drawing", status)}
           />
 
           <StatusCard
             title="Short"
-            status={
-              pokemon.short?.status ||
-              "pending"
-            }
-            onChange={(status) =>
-              updateStatus(
-                "short",
-                status
-              )
-            }
+            status={pokemon.short?.status || "pending"}
+            onChange={(status) => updateStatus("short", status)}
           />
 
           <StatusCard
             title="Long Video"
-            status={
-              pokemon.long?.status ||
-              "pending"
-            }
-            onChange={(status) =>
-              updateStatus(
-                "long",
-                status
-              )
-            }
+            status={pokemon.long?.status || "pending"}
+            onChange={(status) => updateStatus("long", status)}
           />
-
         </div>
       </section>
 
-      {/* =================================================
-          GENERATED CONTENT
-      ================================================= */}
+      {/* CLOUDINARY VIDEO LIBRARY */}
 
       <section className="detail-section">
-
         <div className="detail-section-heading">
-
           <div>
+            <span className="section-label">
+              YOUR UPLOADED VIDEOS
+            </span>
 
+            <h2>{pokemon.name} Video Library</h2>
+
+            <p>
+              Videos linked to this Pokémon from your Video Vault.
+            </p>
+          </div>
+
+          <span className="pending-badge">
+            {pokemonVideos.length}{" "}
+            {pokemonVideos.length === 1 ? "Video" : "Videos"}
+          </span>
+        </div>
+
+        {pokemonVideos.length > 0 ? (
+          <div className="pokemon-video-grid">
+            {pokemonVideos.map((video, index) => {
+              const videoUrl =
+                video.url ||
+                video.videoUrl ||
+                video.cloudinaryUrl ||
+                video.secure_url ||
+                "";
+
+              const videoTitle =
+                video.title ||
+                video.name ||
+                `${pokemon.name} Video ${index + 1}`;
+
+              if (!videoUrl) {
+                return (
+                  <div
+                    className="content-field"
+                    key={video.id ?? `${pokemon.id}-${index}`}
+                  >
+                    <div className="field-heading">
+                      <span>{videoTitle}</span>
+                    </div>
+
+                    <p>
+                      This video entry does not contain a usable video URL.
+                      Check the video details in your Video Vault.
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <article
+                  className="pokemon-video-card"
+                  key={video.id ?? videoUrl}
+                >
+                  <div className="pokemon-video-heading">
+                    <Play size={17} />
+
+                    <h3>{videoTitle}</h3>
+                  </div>
+
+                  <video
+                    className="pokemon-detail-video"
+                    src={videoUrl}
+                    controls
+                    playsInline
+                    preload="metadata"
+                  >
+                    Your browser does not support HTML video.
+                  </video>
+
+                  {video.videoType && (
+                    <p className="pokemon-video-type">
+                      Type: {video.videoType}
+                    </p>
+                  )}
+
+                  {video.description && (
+                    <p className="pokemon-video-description">
+                      {video.description}
+                    </p>
+                  )}
+
+                  <div className="pokemon-video-actions">
+                    <button
+                      type="button"
+                      className="field-copy-button"
+                      onClick={() =>
+                        copyText(
+                          videoUrl,
+                          `video-url-${video.id ?? index}`
+                        )
+                      }
+                    >
+                      {copiedField ===
+                      `video-url-${video.id ?? index}` ? (
+                        <>
+                          <Check size={14} />
+                          Copied URL
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={14} />
+                          Copy Video URL
+                        </>
+                      )}
+                    </button>
+
+                    <a
+                      className="video-open-link"
+                      href={videoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Open Video
+                    </a>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="empty-state">
+            <h3>No videos linked yet</h3>
+
+            <p>
+              Add a video for {pokemon.name} in the Video Vault.
+              It will appear here when its Pokémon ID or name matches.
+            </p>
+          </div>
+        )}
+      </section>
+
+      {/* CONTENT GENERATOR */}
+
+      <section className="detail-section">
+        <div className="detail-section-heading">
+          <div>
             <span className="section-label">
               CONTENT STUDIO
             </span>
 
-            <h2>
-              YouTube & Social Content
-            </h2>
+            <h2>YouTube & Social Content</h2>
 
             <p>
-              Ready-to-use content for{" "}
-              {pokemon.name}.
+              Ready-to-use content for {pokemon.name}.
             </p>
-
           </div>
 
           <div className="detail-actions">
-
             <button
               type="button"
               className="secondary-action-button"
-              onClick={
-                regenerateContent
-              }
+              onClick={regenerateContent}
             >
               <RefreshCw size={15} />
-
               Regenerate
             </button>
 
             <button
               type="button"
               className="primary-action-button"
-              onClick={
-                saveGeneratedContent
-              }
+              onClick={saveGeneratedContent}
             >
               Save Content
             </button>
-
           </div>
-
         </div>
 
-        {/* =================================================
-            DRAWING CONTENT
-        ================================================= */}
+        {/* DRAWING CONTENT */}
 
         <div className="content-category-heading">
-          <span className="section-label">
-            DRAWING
-          </span>
-
-          <h3>
-            Drawing Content
-          </h3>
-
-          <p>
-            Content for your Pokémon artwork post.
-          </p>
+          <span className="section-label">DRAWING</span>
+          <h3>Drawing Content</h3>
+          <p>Content for your Pokémon artwork post.</p>
         </div>
 
         <ContentField
@@ -462,22 +546,12 @@ ${longScript}
           multiline
         />
 
-        {/* =================================================
-            SHORT VIDEO CONTENT
-        ================================================= */}
+        {/* SHORT VIDEO CONTENT */}
 
         <div className="content-category-heading">
-          <span className="section-label">
-            SHORT VIDEO
-          </span>
-
-          <h3>
-            Short Video Content
-          </h3>
-
-          <p>
-            Content for your Pokémon Shorts.
-          </p>
+          <span className="section-label">SHORT VIDEO</span>
+          <h3>Short Video Content</h3>
+          <p>Content for your Pokémon Shorts.</p>
         </div>
 
         <ContentField
@@ -515,22 +589,12 @@ ${longScript}
           multiline
         />
 
-        {/* =================================================
-            LONG VIDEO CONTENT
-        ================================================= */}
+        {/* LONG VIDEO CONTENT */}
 
         <div className="content-category-heading">
-          <span className="section-label">
-            LONG VIDEO
-          </span>
-
-          <h3>
-            Long Video Content
-          </h3>
-
-          <p>
-            Content for your full-length Pokémon video.
-          </p>
+          <span className="section-label">LONG VIDEO</span>
+          <h3>Long Video Content</h3>
+          <p>Content for your full-length Pokémon video.</p>
         </div>
 
         <ContentField
@@ -577,16 +641,31 @@ ${longScript}
           multiline
         />
 
-        {/* =================================================
-            COPY EVERYTHING
-        ================================================= */}
+        {/* INSTAGRAM CONTENT */}
+
+        <div className="content-category-heading">
+          <span className="section-label">INSTAGRAM</span>
+          <h3>Instagram Caption</h3>
+          <p>
+            Copy this caption and hashtags for your Instagram post or Reel.
+          </p>
+        </div>
+
+        <ContentField
+          label="Instagram Caption with Hashtags"
+          value={instagramCaption}
+          field="instagram-caption"
+          copiedField={copiedField}
+          onCopy={copyText}
+          multiline
+        />
+
+        {/* COPY ALL CONTENT */}
 
         <button
           type="button"
           className="copy-all-content-button"
-          onClick={
-            copyAllContent
-          }
+          onClick={copyAllContent}
         >
           {copiedField === "all" ? (
             <>
@@ -600,7 +679,6 @@ ${longScript}
             </>
           )}
         </button>
-
       </section>
     </div>
   );
@@ -620,22 +698,13 @@ function ContentField({
 }) {
   return (
     <div className="content-field">
-
       <div className="field-heading">
-
-        <span>
-          {label}
-        </span>
+        <span>{label}</span>
 
         <button
           type="button"
           className="field-copy-button"
-          onClick={() =>
-            onCopy(
-              value,
-              field
-            )
-          }
+          onClick={() => onCopy(value, field)}
         >
           {copiedField === field ? (
             <>
@@ -649,19 +718,16 @@ function ContentField({
             </>
           )}
         </button>
-
       </div>
 
       <div
         className={`content-field-box ${
-          multiline
-            ? "multiline"
-            : ""
+          multiline ? "multiline" : ""
         }`}
+        style={{ whiteSpace: "pre-wrap" }}
       >
-        {value}
+        {value || ""}
       </div>
-
     </div>
   );
 }
@@ -684,41 +750,24 @@ function StatusCard({
 
   return (
     <div className="detail-status-card">
-
       <div className="detail-status-card-top">
+        <strong>{title}</strong>
 
-        <strong>
-          {title}
-        </strong>
-
-        <span
-          className={`detail-status-badge ${status}`}
-        >
+        <span className={`detail-status-badge ${status}`}>
           {formatStatus(status)}
         </span>
-
       </div>
 
       <select
         value={status}
-        onChange={(event) =>
-          onChange(
-            event.target.value
-          )
-        }
+        onChange={(event) => onChange(event.target.value)}
       >
-        {options.map(
-          (option) => (
-            <option
-              key={option}
-              value={option}
-            >
-              {formatStatus(option)}
-            </option>
-          )
-        )}
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {formatStatus(option)}
+          </option>
+        ))}
       </select>
-
     </div>
   );
 }
@@ -730,21 +779,12 @@ function StatusCard({
 function formatStatus(status) {
   const labels = {
     pending: "Pending",
-
-    "in-progress":
-      "In Progress",
-
-    completed:
-      "Completed",
-
-    published:
-      "Published"
+    "in-progress": "In Progress",
+    completed: "Completed",
+    published: "Published"
   };
 
-  return (
-    labels[status] ||
-    "Pending"
-  );
+  return labels[status] || "Pending";
 }
 
 export default PokemonDetail;

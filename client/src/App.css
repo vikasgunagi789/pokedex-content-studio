@@ -3205,3 +3205,203 @@ a {
     grid-row: 1;
   }
 }
+
+
+/* =========================================================
+   BOTTOM NAVIGATION — SINGLE CONSISTENT DESIGN
+   ========================================================= */
+
+.bottom-navigation {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+
+  display: flex;
+  justify-content: center;
+
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+
+  background: linear-gradient(
+    to top,
+    rgba(245, 247, 251, 0.98),
+    rgba(245, 247, 251, 0.88),
+    transparent
+  );
+
+  pointer-events: none;
+}
+
+.bottom-navigation-inner {
+  width: 100%;
+  max-width: 620px;
+  min-width: 0;
+  padding: 6px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 19px;
+  background: rgba(255, 255, 255, 0.98);
+
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.12);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  pointer-events: auto;
+}
+
+/* Exactly five equal navigation columns */
+.bottom-nav-items {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  align-items: stretch;
+  gap: 4px;
+
+  width: 100%;
+  min-width: 0;
+}
+
+/* Each item has its own isolated vertical layout */
+.bottom-nav-item {
+  position: relative;
+  min-width: 0;
+  width: 100%;
+  min-height: 60px;
+  padding: 6px 2px;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px;
+
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #64748b;
+
+  font-family: inherit;
+  cursor: pointer;
+  overflow: hidden;
+
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.bottom-nav-item:hover {
+  background: #f8fafc;
+  color: #4338ca;
+}
+
+.bottom-nav-item.active {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+/* Original JSX class: bottom-nav-icon-box */
+.bottom-nav-icon-box {
+  width: 30px;
+  height: 28px;
+  flex: 0 0 28px;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0;
+  margin: 0;
+  border-radius: 9px;
+  line-height: 0;
+}
+
+/* Keep each Lucide SVG at a fixed size */
+.bottom-nav-icon-box svg {
+  display: block !important;
+  width: 21px !important;
+  height: 21px !important;
+  min-width: 21px;
+  min-height: 21px;
+  flex: 0 0 21px !important;
+  overflow: visible;
+}
+
+.bottom-nav-item.active .bottom-nav-icon-box {
+  background: #e0e7ff;
+}
+
+/* Labels cannot overlap adjacent items */
+.bottom-nav-label {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  text-align: center;
+  font-size: 10px;
+  line-height: 13px;
+  font-weight: 600;
+}
+
+.bottom-nav-item.active .bottom-nav-label {
+  font-weight: 750;
+}
+
+.bottom-nav-item:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: -2px;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .bottom-navigation {
+    padding: 7px 8px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .bottom-navigation-inner {
+    padding: 4px;
+    border-radius: 16px;
+  }
+
+  .bottom-nav-items {
+    gap: 2px;
+  }
+
+  .bottom-nav-item {
+    min-height: 56px;
+    padding: 4px 1px;
+    gap: 3px;
+  }
+
+  .bottom-nav-icon-box {
+    width: 26px;
+    height: 25px;
+    flex-basis: 25px;
+  }
+
+  .bottom-nav-icon-box svg {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px;
+    min-height: 20px;
+    flex-basis: 20px !important;
+  }
+
+  .bottom-nav-label {
+    font-size: 9px;
+    line-height: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .bottom-nav-item {
+    min-height: 53px;
+  }
+
+  .bottom-nav-label {
+    font-size: 8px;
+  }
+}

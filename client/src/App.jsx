@@ -321,7 +321,7 @@ const VIDEO_STORAGE_KEY = "vg-pokestudio-videos";
 function App() {
   const [activePage, setActivePage] = useState("dashboard");
 
-  const VIDEO_STORAGE_KEY = "vg-pokestudio-videos";
+  // const VIDEO_STORAGE_KEY = "vg-pokestudio-videos";
 
   const [videos, setVideos] = useState(() => {
     try {
@@ -623,11 +623,14 @@ const [pokemon, setPokemon] = useState(() => {
 
           <section className="content-area">
 
-            <PokemonDetail
-              pokemon={selectedPokemon}
-              onBack={closePokemon}
-              onUpdate={updatePokemon}
-            />
+            
+<PokemonDetail
+  pokemon={selectedPokemon}
+  videos={videos}
+  onBack={closePokemon}
+  onUpdate={updatePokemon}
+/>
+
 
           </section>
 
