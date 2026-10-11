@@ -6,14 +6,44 @@ import pokemonData from "./data/pokemon";
 import PokemonDetail from "./pages/PokemonDetail";
 
 import BottomNavigation from "./components/BottomNavigation";
+import VideoVault from "./components/VideoVault";
 
 import { getPokemonImage } from "./utils/pokemonImage";
 
 const STORAGE_KEY = "pokedex-content-studio";
 
+const VIDEO_STORAGE_KEY = "vg-pokestudio-videos";
+
+const [videos, setVideos] = useState(() => {
+  try {
+    const savedVideos = localStorage.getItem(VIDEO_STORAGE_KEY);
+    const parsedVideos = savedVideos ? JSON.parse(savedVideos) : [];
+
+    return Array.isArray(parsedVideos) ? parsedVideos : [];
+  } catch (error) {
+    console.error("Unable to load saved videos:", error);
+    return [];
+  }
+});
+
 function App() {
   const [activePage, setActivePage] = useState("dashboard");
 
+  const VIDEO_STORAGE_KEY = "vg-pokestudio-videos";
+
+  const [videos, setVideos] = useState(() => {
+    try {
+      const savedVideos = localStorage.getItem(VIDEO_STORAGE_KEY);
+      const parsedVideos = savedVideos
+        ? JSON.parse(savedVideos)
+        : [];
+
+      return Array.isArray(parsedVideos) ? parsedVideos : [];
+    } catch (error) {
+      console.error("Unable to load saved videos:", error);
+      return [];
+    }
+  });
   
 const [pokemon, setPokemon] = useState(() => {
   try {
@@ -96,6 +126,17 @@ const [pokemon, setPokemon] = useState(() => {
     }
   }, [pokemon]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        VIDEO_STORAGE_KEY,
+        JSON.stringify(videos)
+      );
+    } catch (error) {
+      console.error("Unable to save videos:", error);
+    }
+  }, [videos]);
+
   /* =====================================================
      STATISTICS
   ===================================================== */
@@ -134,6 +175,19 @@ const [pokemon, setPokemon] = useState(() => {
     );
 
     setSelectedPokemon(updatedPokemon);
+  }
+
+    function handleAddVideo(newVideo) {
+    setVideos((currentVideos) => [
+      newVideo,
+      ...currentVideos,
+    ]);
+  }
+
+  function handleDeleteVideo(videoId) {
+    setVideos((currentVideos) =>
+      currentVideos.filter((video) => video.id !== videoId)
+    );
   }
 
   function updateAllPokemon(updatedPokemonList) {
@@ -366,6 +420,15 @@ const [pokemon, setPokemon] = useState(() => {
             />
           )}
 
+          {activePage === "videos" && (
+  <VideoVault
+    pokemon={pokemon}
+    videos={videos}
+    onAddVideo={handleAddVideo}
+    onDeleteVideo={handleDeleteVideo}
+  />
+)}
+
         </section>
 
       </main>
@@ -451,13 +514,11 @@ function getPageTitle(page) {
     dashboard: "Dashboard",
     pokedex: "Pokédex",
     schedule: "Content Schedule",
-    progress: "Progress"
+    progress: "Progress",
+    videos: "Video Vault",
   };
 
-  return (
-    titles[page] ||
-    "Dashboard"
-  );
+  return titles[page] || "Dashboard";
 }
 
 /* =========================================================
