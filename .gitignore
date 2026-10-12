@@ -1,2 +1,20 @@
 .vercel
 .env*
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+dist-ssr/
+**/dist-ssr/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Deployment and logs
+.vercel/
+*.log
