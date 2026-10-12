@@ -1,20 +1,29 @@
 .vercel
 .env*
+
 # Dependencies
 node_modules/
 **/node_modules/
 
-# Build output
+# Production builds
 dist/
 **/dist/
-dist-ssr/
-**/dist-ssr/
 
-# Environment secrets
+# Environment variables and secrets
 .env
 .env.*
 !.env.example
 
-# Deployment and logs
+# Vercel and Firebase local configuration
 .vercel/
+.firebase/
+
+# Logs and local files
 *.log
+.DS_Store
+Thumbs.db
+
+# Firebase Admin credentials
+serviceAccountKey.json
+*-service-account*.json
+firebase-adminsdk-*.json
