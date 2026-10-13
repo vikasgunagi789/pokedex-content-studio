@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { db } from "./firebase";
 
 import "./App.css";
 
@@ -13,7 +15,7 @@ import { getPokemonImage } from "./utils/pokemonImage";
 const STORAGE_KEY = "pokedex-content-studio";
 const VIDEO_STORAGE_KEY = "vg-pokestudio-videos";
 
-// function App() {
+// function App({ user }) {
 //   const [activePage, setActivePage] = useState("dashboard");
 //   const [selectedPokemon, setSelectedPokemon] = useState(null);
 
@@ -318,7 +320,7 @@ const VIDEO_STORAGE_KEY = "vg-pokestudio-videos";
 //   );
 // }
 
-function App() {
+function App({ user }) {
   const [activePage, setActivePage] = useState("dashboard");
 
   // const VIDEO_STORAGE_KEY = "vg-pokestudio-videos";
@@ -410,13 +412,19 @@ const [pokemon, setPokemon] = useState(() => {
         STORAGE_KEY,
         JSON.stringify(pokemon)
       );
+      if (user?.uid) {
+        setDoc(doc(db, "users", user.uid, "progress", "pokemon"), {
+          items: pokemon,
+          updatedAt: serverTimestamp(),
+        }).catch((error) => console.error("Cloud Pokémon save failed:", error));
+      }
     } catch (error) {
       console.error(
         "Unable to save content:",
         error
       );
     }
-  }, [pokemon]);
+  }, [pokemon, user?.uid]);
 
   useEffect(() => {
     try {
@@ -424,10 +432,16 @@ const [pokemon, setPokemon] = useState(() => {
         VIDEO_STORAGE_KEY,
         JSON.stringify(videos)
       );
+      if (user?.uid) {
+        setDoc(doc(db, "users", user.uid, "progress", "videos"), {
+          items: videos,
+          updatedAt: serverTimestamp(),
+        }).catch((error) => console.error("Cloud video save failed:", error));
+      }
     } catch (error) {
       console.error("Unable to save videos:", error);
     }
-  }, [videos]);
+  }, [videos, user?.uid]);
 
   /* =====================================================
      STATISTICS
